@@ -1,6 +1,6 @@
 #include <iostream>
-#include <vector>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -8,103 +8,61 @@ struct word
 {
     string text;
     int f=1;
-    word* left;
-    word* right;
+    word(): text(" "), f(1) {};
+    word(string t, int f):text(t), f(f) {};
 };
 
-
-void insert(word* &root, word* p){
-    if (!root){
-        root = p;
-        return;
-    }
-
-    if (root->text == p->text)
+void insert(vector<word> &l, string w){
+    for ( word &i : l)
     {
-        root->f+=1;
+        if (i.text == w)
+        {
+            i.f+=1;
+            return;
+        }
     }
-    
-
-    if (p->text < root->text){
-        insert(root->left, p);
-        return ;
-    }
-
-    if (p->text > root->text){
-        insert(root->right, p);
-        return ;
-    }
-
-    return;
+    word p(w, 1);
+    l.push_back(p);
 }
 
-void insertByF(word* &root, string text, int f){
-    if (!root){
-        word* p = new word;
-        p->text = text;
-        p->f = f;
-        return;
+void sort(vector<word> &l){
+    int i, j;
+    word key;
+    for (i = 1; i < l.size(); i++)
+    {
+        key = l[i];
+        j = i - 1;
+ 
+        // Move elements of arr[0..i-1], 
+        // that are greater than key, to one
+        // position ahead of their
+        // current position
+        while (j >= 0 && l[j].f < key.f)
+        {
+            l[j + 1] = l[j];
+            j = j - 1;
+        }
+        l[j + 1] = key;
     }
-    if (root->text == text){
-        return ;
-    }
-    if (f < root->f){
-        insertByF(root->left, text, f);
-        return ;
-    }
-    if (f > root->f){
-        insertByF(root->right, text, f);
-        return ;
-    }
-    return;
 }
 
-// in-order tree traversal from right hand side first
-void traverse(word* root, word* &newList){
-    if (!root){
-        return ;
+void printVec(vector<word> l){
+    for (word i : l)
+    {
+        cout << i.text << ": " << i.f<< endl;
     }
-    word* p = new word;
-    p->text = root->text;
-    p->f = root->f;
-
-    traverse(root->left, newList);
-    // insertByF(newList, root);
-    traverse(root->right, newList);
-}
-
-void printInDecending(word* root){
-    if (!root){
-        return;
-    }
-    printInDecending(root->left);
-    cout << root->text << ": " << root->f << endl;
-    printInDecending(root->right);
 }
 
 int main(){
-    string db;
-    cout << ".txt: ";
-    cin >> db;
-
-    ifstream f(db);
-    if (!f.is_open())
-    {
-        cout << "file not found. \n";
-        exit(0);
-    }
-    
-    word* root;
     string temp;
-    while (f >> temp){
-        // cout << "Trying to add: " << temp <<endl;
-        word* p = new word;
-        p->text = temp;
-        insert(root, p);
-    }
+    ifstream f("db.txt");
+    vector<word> l;
 
-    word* newList;
-    traverse(root, newList);
-    printInDecending(newList);
+    while (f >> temp)
+    {
+        insert(l, temp);
+    }
+    sort(l);
+    printVec(l);
     return 0;
 }
